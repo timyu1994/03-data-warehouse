@@ -8,7 +8,9 @@ What is count of records for the 2024 Yellow Taxi Data?
 - **20,332,093**
 - 85,431,289
 
+```sql
 SELECT COUNT(*) FROM `taxi-rides-ny-486815.nytaxi.external_yellow_tripdata`;
+```
 
 ### Question 2. Data read estimation
 
@@ -21,8 +23,10 @@ What is the **estimated amount** of data that will be read when this query is ex
 - 2.14 GB for the External Table and 0MB for the Materialized Table
 - 0 MB for the External Table and 0MB for the Materialized Table
 
+```sql
 SELECT DISTINCT COUNT(PULocationID) FROM `taxi-rides-ny-486815.nytaxi.external_yellow_tripdata`;
 SELECT DISTINCT COUNT(PULocationID) FROM `taxi-rides-ny-486815.nytaxi.yellow_tripdata_2024_regular`;
+```
 
 ### Question 3. Understanding columnar storage
 
@@ -36,8 +40,10 @@ doubling the estimated bytes processed.
 - BigQuery automatically caches the first queried column, so adding a second column increases processing time but does not affect the estimated bytes scanned.
 - When selecting multiple columns, BigQuery performs an implicit join operation between them, increasing the estimated bytes processed
 
+```sql
 SELECT PULocationID FROM `taxi-rides-ny-486815.nytaxi.yellow_tripdata_2024_regular`;
 SELECT PULocationID, DOLocationID FROM `taxi-rides-ny-486815.nytaxi.yellow_tripdata_2024_regular`;
+```
 
 ### Question 4. Counting zero fare trips
 
@@ -47,7 +53,9 @@ How many records have a fare_amount of 0?
 - 20,188,016
 - **8,333**
 
+```sql
 SELECT COUNT(*) FROM `taxi-rides-ny-486815.nytaxi.yellow_tripdata_2024_regular` WHERE fare_amount = 0;
+```
 
 ### Question 5. Partitioning and clustering
 
@@ -58,10 +66,12 @@ What is the best strategy to make an optimized table in Big Query if your query 
 - Cluster on tpep_dropoff_datetime Partition by VendorID
 - Partition by tpep_dropoff_datetime and Partition by VendorID
 
+```sql
 CREATE OR REPLACE TABLE `taxi-rides-ny-486815.nytaxi.yellow_tripdata_2024_optimized`
 PARTITION BY DATE(tpep_dropoff_datetime)
 CLUSTER BY VendorID AS
 SELECT * FROM `taxi-rides-ny-486815.nytaxi.external_yellow_tripdata`;
+```
 
 ### Question 6. Partition benefits
 
@@ -80,8 +90,10 @@ Choose the answer which most closely matches.
 - 5.87 MB for non-partitioned table and 0 MB for the partitioned table
 - 310.31 MB for non-partitioned table and 285.64 MB for the partitioned table
 
+```sql
 SELECT DISTINCT VendorID FROM `taxi-rides-ny-486815.nytaxi.yellow_tripdata_2024_regular` WHERE tpep_dropoff_datetime BETWEEN '2024-03-01' AND '2024-03-15';
 SELECT DISTINCT VendorID FROM `taxi-rides-ny-486815.nytaxi.yellow_tripdata_2024_optimized` WHERE tpep_dropoff_datetime BETWEEN '2024-03-01' AND '2024-03-15'
+```
 
 
 ### Question 7. External table storage
@@ -103,3 +115,5 @@ It is best practice in Big Query to always cluster your data:
 ### Question 9. Understanding table scans
 
 No Points: Write a `SELECT count(*)` query FROM the materialized table you created. How many bytes does it estimate will be read? Why?
+
+0 MB. BigQuery maintains a highly optimized metadata store for every native (materialized) table. This metadata keeps a constant, real-time count of the total number of rows. COUNT(*) without filtering with a WHERE clause will allow BigQuery to simply read the pre-calculated row count from the table's metadata.
